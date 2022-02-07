@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% block title %}<title>Panel użytkownika {{user}}</title>{% endblock %}
+    <style>
+        .middle-box {
+        float: left;
+        width:  33%;
+        height: 700px;
+        overflow: auto;
+        }
+    </style>
+</head>
+<body>
+<center><h1>Witaj @{{user}}, poprawnie zalogowano do panelu!</h1></center>
+<center><a href="{{url_for('logout_page')}}">Wyloguj mnie!</a></center>
+<center>
+    <div class="middle-box">
+        <h3>Aktualnie obserwujesz:</h3>
+        {% for users in following_list %}
+            <a target="_blank" href={{"https://twitter.com/"+users}}>@{{users.split(' ')[1]}}</a> <center><a href="{{url_for('unfollow_user', user_id=users.split(' ')[0], user_name=users.split(' ')[1])}}"> Przestań obserwować</a></center><br>
+        {% endfor %}
+    </div>
+    <div class="middle-box">
+        <h3>Wyswietl użytkownika po nazwie:</h3>
+        <form action="/panel/" method="post">
+            <input type="text" name="username" required><br>
+            <input type="submit" name="button_panel" value="search"><br>
+        </form>
+        {% if searched_user is defined %}
+            {{searched_user.split("-")[1]}} (@{{searched_user.split("-")[2]}})<br>
+        <form action={{url_for('panel_site',user_data=searched_user)}} method="post">
+            <input type="submit" name="button_panel" value="follow"> <input type="submit" name="button_panel" value="monitoruj"><br>
+        </form>
+        {% endif %}
+    </div>
+    <div class="middle-box">
+        <h3>Monitor obserwacji:</h3>
+        {% if monitoring_list != None %}
+            {% for users in monitoring_list %}
+                <a target="_blank" href={{"https://twitter.com/"+users[1]}}>@{{users[1]}}</a>
+                <center>Last follow:
+                    {% if users[2] is defined %}
+                        {{users[2]}}
+                    {% else %}
+                        brak zmian
+                    {% endif %}
+                </center>
+                <center>Last unfollow:
+                    {% if users[3] is defined %}
+                        {{users[3]}}
+                    {% else %}
+                        brak zmian
+                    {% endif %}
+                </center>
+                <center><a href="{{url_for('unmonitor_user', user_id=users[0], user_name=users[1])}}"> Przestań monitorować</a><br><br>
+            {% endfor %}
+        {% endif %}
+    </div>
+</center>
+
+</body>
+</html>
