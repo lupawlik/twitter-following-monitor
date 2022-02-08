@@ -150,20 +150,47 @@ def panel_site(user_data='', data=''):
     # get last follow updates and name from spied_users table, searching by monitoring_ids
     # used to print in html
     # return None if last_follow/last_unfollow is empty
-    # if user is monitoring more than one user - get tuple of monitoring user ids
+    # if user is monitoring more than one user - get list of monitoring users and last updates
     # else get user id - string
+    # list of last follows or list of last unfollow it's in string format separated with , (split it and save back in users_with_updates)
+    # when is monitored only one person
+    # users_with_updates[0][2] it is last follow info. users_with_updates[0][3] it is last unfollow info
+
     if len(monitoring_list) == 1:
         query = f"SELECT user_id, name, last_follow, last_unfollow FROM spied_users WHERE user_id is {monitoring_list[0].split(' ')[0]}"
         c.execute(query)
         users_with_updates = list(c.fetchall())
+
+        # change tuple to list
+        for i in range(len(users_with_updates)):
+            users_with_updates[i] = list(users_with_updates[i])
+        # split string to list with new follow and unfollow updates
+        if users_with_updates[0][2]:
+            users_with_updates[0][2] = users_with_updates[0][2].split(',')
+        if users_with_updates[0][3]:
+            users_with_updates[0][3] = users_with_updates[0][3].split(',')
+
+    # when is monitored more than one person
     elif len(monitoring_list) > 1:
         monitoring_ids = tuple(x.split(" ")[0] for x in monitoring_list)
         query = f"SELECT user_id, name, last_follow, last_unfollow FROM spied_users WHERE user_id in {monitoring_ids}"
         c.execute(query)
         users_with_updates = list(c.fetchall())
+
+        # change tuple to list
+        for i in range(len(users_with_updates)):
+            users_with_updates[i] = list(users_with_updates[i])
+        print(users_with_updates)
+        for single_person in users_with_updates:
+            if single_person[2]:
+                single_person[2] = single_person[2].split(',')
+            if single_person[3]:
+                single_person[3] = single_person[3].split(',')
+
     # if user is not monitoring anyone
     else:
         users_with_updates = None
+    print(users_with_updates)
 
     if request.method == "POST":
         req = request.form

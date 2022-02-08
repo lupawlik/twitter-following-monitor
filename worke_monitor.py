@@ -42,6 +42,7 @@ class Monitor(object):
         if not r.ok:
             return False
         r = r.json()
+
         new_users_to_query = following_list
 
         # check if user follow someone new

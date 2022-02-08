@@ -41,15 +41,19 @@
             {% for users in monitoring_list %}
                 <a target="_blank" href={{"https://twitter.com/"+users[1]}}>@{{users[1]}}</a>
                 <center>Last follow:
-                    {% if users[2] is defined %}
-                        {{users[2]}}
+                    {% if users[2] != None %}
+                    {% for new_followers in users[2] %}
+                        {{new_followers.split(" ")[1]}}
+                    {% endfor %}
                     {% else %}
                         brak zmian
                     {% endif %}
                 </center>
                 <center>Last unfollow:
-                    {% if users[3] is defined %}
-                        {{users[3]}}
+                    {% if users[3] != None %}
+                    {% for new_unfollow in users[3] %}
+                        {{new_unfollow.split(" ")[1]}}
+                    {% endfor %}
                     {% else %}
                         brak zmian
                     {% endif %}
