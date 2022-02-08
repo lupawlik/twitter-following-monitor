@@ -166,9 +166,9 @@ def panel_site(user_data='', data=''):
             users_with_updates[i] = list(users_with_updates[i])
         # split string to list with new follow and unfollow updates
         if users_with_updates[0][2]:
-            users_with_updates[0][2] = users_with_updates[0][2].split(',')
+            users_with_updates[0][2] = users_with_updates[0][2].split(',')[:-1]
         if users_with_updates[0][3]:
-            users_with_updates[0][3] = users_with_updates[0][3].split(',')
+            users_with_updates[0][3] = users_with_updates[0][3].split(',')[:-1]
 
     # when is monitored more than one person
     elif len(monitoring_list) > 1:
@@ -177,20 +177,19 @@ def panel_site(user_data='', data=''):
         c.execute(query)
         users_with_updates = list(c.fetchall())
 
-        # change tuple to list
+        # change tuple to list and remove last element - it is empty
         for i in range(len(users_with_updates)):
             users_with_updates[i] = list(users_with_updates[i])
-        print(users_with_updates)
+
         for single_person in users_with_updates:
             if single_person[2]:
-                single_person[2] = single_person[2].split(',')
+                single_person[2] = single_person[2].split(',')[:-1]
             if single_person[3]:
-                single_person[3] = single_person[3].split(',')
+                single_person[3] = single_person[3].split(',')[:-1]
 
     # if user is not monitoring anyone
     else:
         users_with_updates = None
-    print(users_with_updates)
 
     if request.method == "POST":
         req = request.form
@@ -220,6 +219,7 @@ def panel_site(user_data='', data=''):
                 if f"{user_id} {user_name}," in current_user.following:
                     return redirect(url_for("panel_site"))
 
+                # follow new user and save new follow in db
                 follow_user = TwitterApi(current_user).follow_user(user_id)
                 new_user_in_following = current_user.following+f"{user_id} {user_name},"
                 query = f"UPDATE user SET following='{new_user_in_following}' WHERE user_id='{current_user.user_id}'"
@@ -245,6 +245,7 @@ def panel_site(user_data='', data=''):
                     # when user in monitor already exist
                     if f"{user_id} {user_name}," in current_user.spied_users:
                         return redirect(url_for("panel_site"))
+
                     new_user = f"{current_user.spied_users}{user_id} {user_name},"
                     query = f"UPDATE user SET spied_users='{new_user}' WHERE user_id='{current_user.user_id}'"
                 # get following list to spied user
@@ -263,7 +264,7 @@ def panel_site(user_data='', data=''):
                 c.execute(query)
                 conn.commit()
                 return redirect(url_for("panel_site"))
-        # runs when user searched for user
+        # runs when user searched for twitter user
         return render_template("panel.html", user=current_user.name, following_list=following_list, monitoring_list=users_with_updates, searched_user=user_data)
     # runs when url is without any parameters
     return render_template("panel.html", user=current_user.name, following_list=following_list, monitoring_list=users_with_updates)
@@ -272,6 +273,7 @@ def panel_site(user_data='', data=''):
 @app.route("/unfollow/<user_id>/<user_name>/", methods=['POST', 'GET'])
 @login_required
 def unfollow_user(user_id, user_name):
+    # unfollow user and remove this follow from db
     TwitterApi(current_user).unfollow_user(user_id)
     remove_from_db = f"{user_id} {user_name},"
     conn = sqlite3.connect("database.db", check_same_thread=False)
@@ -290,6 +292,7 @@ def unfollow_user(user_id, user_name):
 @app.route("/unmonitor/<user_id>/<user_name>/", methods=['POST', 'GET'])
 @login_required
 def unmonitor_user(user_id, user_name):
+    # remove monitoring from user and remove this user from spied_user in user table
     remove_from_db = f"{user_id} {user_name},"
     conn = sqlite3.connect("database.db", check_same_thread=False)
     c = conn.cursor()
