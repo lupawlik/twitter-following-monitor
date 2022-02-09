@@ -1,5 +1,4 @@
-# DODAĆ TABELE Z RAPORTAMI
-# ZAMIENIĆ POBIERANIE OSTATNICH AKTULAIZACJI NA TE Z TABELI Z RAPORTAMI - BRAĆ POD UWAGĘ ILOŚC DNI NA RAPORT (DODAĆ TAKA KOLUMNE DLA USEROW)
+# BRAĆ POD UWAGĘ ILOŚC DNI NA RAPORT (DODAĆ TAKA KOLUMNE DLA USEROW)
 # ZROBIĆ WORKERA KTÓRY BĘDZIE USUWAŁ RAPORTY STARSZE NIZ TYDZIEN
 
 
@@ -188,7 +187,7 @@ def panel_site(user_data='', data=''):
                 for spied_user in end_single_user_data:
                     followed += spied_user[2]
                     unfollowed += spied_user[3]
-                out_datas = [end_single_user_data[0][0], end_single_user_data[0][1], followed.split(","), unfollowed.split(",")]
+                out_datas = [end_single_user_data[0][0], end_single_user_data[0][1], followed.split(",")[:-1], unfollowed.split(",")[:-1]]
             list_of_all_spied_datas.append(out_datas)
 
     # if user is not monitoring anyone
@@ -261,7 +260,7 @@ def panel_site(user_data='', data=''):
 
                 # add user to spied_users table
                 spied_usr = SpiedUsers(user_id, user_name, screen_name, new_users_to_query)
-                print(f"[{current_user.name}] set monitoring on {user_name}")
+                print(f"[{current_user.name}] Set's monitoring on {user_name}")
                 db.session.add(spied_usr)
                 try:
                     db.session.commit()
@@ -315,9 +314,7 @@ def unmonitor_user(user_id, user_name):
     c.execute(query)
     all_spied_users = c.fetchall()
     is_user_in_spied = False
-    print("DO USUNIECIA ", remove_from_db)
     for spied_users in all_spied_users:
-        print(spied_users[0])
         try:
             if remove_from_db in spied_users[0]:
                 is_user_in_spied = True
@@ -339,4 +336,4 @@ if __name__ == '__main__':
     # flask app
     threading.Thread(target=lambda: app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)).start()
     # monitor twitter
-    #threading.Thread(target=monitor.star_monitor).start()
+    threading.Thread(target=monitor.star_monitor).start()
