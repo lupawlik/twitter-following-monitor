@@ -2,7 +2,8 @@ import sqlite3
 import time
 from requests_oauthlib import OAuth1Session
 from twitter_api import TWITTER_KEY, TWITTER_SECRET
-
+from db_objects import Reports
+from __main__ import db
 # worker to check if users follow someone new
 # gets client secrets - used to make requests
 # get following from twitter api and db for given user and compare it
@@ -32,7 +33,7 @@ class Monitor(object):
     # takes following list of spied user from db and from api. Compare and add last_follow, last_unfollow and update following column in spied_users
     # token and secret from user table, used to make requests
     # return false if request is faile
-    def check_user(self, token, secret, user_id, following_list):
+    def check_user(self, token, secret, user_id, following_list, user_name):
         token = OAuth1Session(
             client_key=TWITTER_KEY,
             client_secret=TWITTER_SECRET,
@@ -57,7 +58,7 @@ class Monitor(object):
                 # add this user to string that been added to old following list and saved in db
                 users_to_add += f"{user_from_r['id']} {user_from_r['username']},"
         if users_to_add:
-            print(f"[{user_id}] started following {users_to_add}")
+            print(f"[{user_name}] started following {users_to_add}")
             query = f"UPDATE spied_users SET last_follow='{users_to_add}' WHERE user_id='{user_id}'"
             self.c.execute(query)
             self.conn.commit()
@@ -79,16 +80,35 @@ class Monitor(object):
                 users_to_delete += delete_this
                 new_users_to_query = str(new_users_to_query).replace(delete_this, "")
         if users_to_delete:
-            print(f"[{user_id}] removed from following {users_to_delete}")
+            print(f"[{user_name}] removed from following {users_to_delete}")
             query = f"UPDATE spied_users SET last_unfollow='{users_to_delete}' WHERE user_id='{user_id}'"
             self.c.execute(query)
             self.conn.commit()
 
-        # add to new followers in db
+        # add to new followeusers_to_addrs in db
         new_users_to_query += users_to_add
         query = f"UPDATE spied_users SET following='{new_users_to_query}' WHERE user_id='{user_id}'"
         self.c.execute(query)
         self.conn.commit()
+
+        # when no changes:
+        if not users_to_add and not users_to_delete:
+            print("0")
+            return True
+
+        # add new record to report table
+        if not users_to_add and users_to_delete:
+            record_in_report = Reports(user_id, user_name, "", users_to_delete)
+            print("1")
+        elif users_to_add and not users_to_delete:
+            record_in_report = Reports(user_id, user_name, users_to_add, "")
+            print("2")
+        elif users_to_add and users_to_delete:
+            record_in_report = Reports(user_id, user_name, users_to_add, users_to_delete)
+            print("3")
+
+        db.session.add(record_in_report)
+        db.session.commit()
         return True
 
     def star_monitor(self):
@@ -111,7 +131,7 @@ class Monitor(object):
                 print(f"[FOLLOWING MONITOR] Checking {user_to_check[1]} using {secrets[client_number][2]} auth secrets")
                 user_checked = False
                 while not user_checked:
-                    user_checked = self.check_user(secrets[client_number][0], secrets[client_number][1], user_to_check[0], user_to_check[2])
+                    user_checked = self.check_user(secrets[client_number][0], secrets[client_number][1], user_to_check[0], user_to_check[2], user_to_check[1])
                     if not user_checked:
                         print("[FOLLOWING MONITOR] Too many requests... Waiting 15 minutes")
                         time.sleep(900)

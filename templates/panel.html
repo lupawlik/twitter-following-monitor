@@ -62,7 +62,7 @@
                     <div class="monitored-user-name">
                         <div class="monitored-urls"><a target="_blank" href={{"https://twitter.com/"+users[1]}}><strong>@{{users[1]}}</strong></a></div>
                         <div class="monitored-urls"><a href="{{url_for('unmonitor_user', user_id=users[0], user_name=users[1])}}"> Przestań monitorować</a></div>
-                    <span class="title-span">Nowe followy:</span>
+                    <span class="title-span"><strong>Nowe followy:</strong></span>
                     {% if users[2] != None %}
                         <span class="monitoring-list">
                             {% for new_followers in users[2] %}
@@ -72,7 +72,7 @@
                     {% else %}
                         <span class="monitoring-list">Brak zmian</span><br>
                     {% endif %}
-                    <span class="title-span">Nowe followy:</span>
+                    <span class="title-span"><strong>Nowe unfollowy:</strong></span>
                     {% if users[3] != None %}
                         <span class="monitoring-list">
                             {% for new_followers in users[3] %}

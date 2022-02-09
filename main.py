@@ -1,3 +1,8 @@
+# DODAĆ TABELE Z RAPORTAMI
+# ZAMIENIĆ POBIERANIE OSTATNICH AKTULAIZACJI NA TE Z TABELI Z RAPORTAMI - BRAĆ POD UWAGĘ ILOŚC DNI NA RAPORT (DODAĆ TAKA KOLUMNE DLA USEROW)
+# ZROBIĆ WORKERA KTÓRY BĘDZIE USUWAŁ RAPORTY STARSZE NIZ TYDZIEN
+
+
 # 1 step - app have button to login via twitter, add user to sqlite db. Login to user from db by flask_login library
 
 import threading
@@ -6,7 +11,6 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from twitter_api import TwitterApi, request_token, access_token
-from worke_monitor import Monitor
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = ".."
@@ -14,8 +18,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
 login_m = LoginManager() # set flask login extension
 login_m.init_app(app)
-from db_objects import User, SpiedUsers
 
+from db_objects import User, SpiedUsers
+from worke_monitor import Monitor
 
 # route to main page
 @app.route("/", methods=['POST', 'GET'])
