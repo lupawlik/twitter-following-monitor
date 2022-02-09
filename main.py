@@ -160,41 +160,40 @@ def panel_site(user_data='', data=''):
     # list of last follows or list of last unfollow it's in string format separated with , (split it and save back in users_with_updates)
     # when is monitored only one person
     # users_with_updates[0][2] it is last follow info. users_with_updates[0][3] it is last unfollow info
+    list_of_all_spied_datas = []#  stores list of list first. First list contains list of data of each spied user, second contains [id, name, last_follow, last_unfollow]
 
-    if len(monitoring_list) == 1:
-        query = f"SELECT user_id, name, last_follow, last_unfollow FROM spied_users WHERE user_id is {monitoring_list[0].split(' ')[0]}"
-        c.execute(query)
-        users_with_updates = list(c.fetchall())
-
-        # change tuple to list
-        for i in range(len(users_with_updates)):
-            users_with_updates[i] = list(users_with_updates[i])
-        # split string to list with new follow and unfollow updates
-        if users_with_updates[0][2]:
-            users_with_updates[0][2] = users_with_updates[0][2].split(',')[:-1]
-        if users_with_updates[0][3]:
-            users_with_updates[0][3] = users_with_updates[0][3].split(',')[:-1]
-
-    # when is monitored more than one person
-    elif len(monitoring_list) > 1:
+    # when is monitored one person or more
+    if len(monitoring_list) > 0:
         monitoring_ids = tuple(x.split(" ")[0] for x in monitoring_list)
-        query = f"SELECT user_id, name, last_follow, last_unfollow FROM spied_users WHERE user_id in {monitoring_ids}"
-        c.execute(query)
-        users_with_updates = list(c.fetchall())
+        # get data from report table, if in report table record with given id is not exist, set last follow/unfollow to None
+        for i in monitoring_ids:
+            query = f"SELECT user_id, name, last_follow, last_unfollow FROM reports WHERE user_id is {i}"
+            c.execute(query)
+            users_with_updates = list(c.fetchall())
 
-        # change tuple to list and remove last element - it is empty
-        for i in range(len(users_with_updates)):
-            users_with_updates[i] = list(users_with_updates[i])
+            # when record not exist for this user, get only name and id
+            if not users_with_updates:
+                query = f"SELECT user_id, name, last_follow, last_unfollow FROM spied_users WHERE user_id is {i}"
+                c.execute(query)
+                users_with_updates = list(c.fetchall())
+                #print(users_with_updates)
+                end_single_user_data = (users_with_updates[0][0], users_with_updates[0][1], None, None)
+                out_datas = list(end_single_user_data)
 
-        for single_person in users_with_updates:
-            if single_person[2]:
-                single_person[2] = single_person[2].split(',')[:-1]
-            if single_person[3]:
-                single_person[3] = single_person[3].split(',')[:-1]
+            else:
+                # join records for same user, and save data for singe spied user in list [id, name, followed, unfollowed]
+                end_single_user_data = users_with_updates
+                followed = ""
+                unfollowed = ""
+                for spied_user in end_single_user_data:
+                    followed += spied_user[2]
+                    unfollowed += spied_user[3]
+                out_datas = [end_single_user_data[0][0], end_single_user_data[0][1], followed.split(","), unfollowed.split(",")]
+            list_of_all_spied_datas.append(out_datas)
 
     # if user is not monitoring anyone
     else:
-        users_with_updates = None
+        list_of_all_spied_datas = None
 
     if request.method == "POST":
         req = request.form
@@ -246,6 +245,7 @@ def panel_site(user_data='', data=''):
                 if not current_user.spied_users:
                     new_user = f"{user_id} {user_name},"
                     query = f"UPDATE user SET spied_users='{new_user}' WHERE user_id='{current_user.user_id}'"
+
                 else:
                     # when user in monitor already exist
                     if f"{user_id} {user_name}," in current_user.spied_users:
@@ -261,6 +261,7 @@ def panel_site(user_data='', data=''):
 
                 # add user to spied_users table
                 spied_usr = SpiedUsers(user_id, user_name, screen_name, new_users_to_query)
+                print(f"[{current_user.name}] set monitoring on {user_name}")
                 db.session.add(spied_usr)
                 try:
                     db.session.commit()
@@ -270,9 +271,9 @@ def panel_site(user_data='', data=''):
                 conn.commit()
                 return redirect(url_for("panel_site"))
         # runs when user searched for twitter user
-        return render_template("panel.html", user=current_user.name, following_list=following_list, monitoring_list=users_with_updates, searched_user=user_data)
+        return render_template("panel.html", user=current_user.name, following_list=following_list, monitoring_list=list_of_all_spied_datas, searched_user=user_data)
     # runs when url is without any parameters
-    return render_template("panel.html", user=current_user.name, following_list=following_list, monitoring_list=users_with_updates)
+    return render_template("panel.html", user=current_user.name, following_list=following_list, monitoring_list=list_of_all_spied_datas)
 
 # used to unfollow user and remove from db
 @app.route("/unfollow/<user_id>/<user_name>/", methods=['POST', 'GET'])
@@ -314,10 +315,15 @@ def unmonitor_user(user_id, user_name):
     c.execute(query)
     all_spied_users = c.fetchall()
     is_user_in_spied = False
+    print("DO USUNIECIA ", remove_from_db)
     for spied_users in all_spied_users:
-        if remove_from_db in spied_users:
-            is_user_in_spied = True
-            break
+        print(spied_users[0])
+        try:
+            if remove_from_db in spied_users[0]:
+                is_user_in_spied = True
+                break
+        except:
+            continue
     if not is_user_in_spied:
         print(f"Removing '{user_name}' from spied_users")
         query = f"DELETE FROM spied_users WHERE user_id='{user_id}'"
@@ -333,4 +339,4 @@ if __name__ == '__main__':
     # flask app
     threading.Thread(target=lambda: app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)).start()
     # monitor twitter
-    threading.Thread(target=monitor.star_monitor).start()
+    #threading.Thread(target=monitor.star_monitor).start()

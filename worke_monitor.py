@@ -93,19 +93,15 @@ class Monitor(object):
 
         # when no changes:
         if not users_to_add and not users_to_delete:
-            print("0")
             return True
 
         # add new record to report table
         if not users_to_add and users_to_delete:
             record_in_report = Reports(user_id, user_name, "", users_to_delete)
-            print("1")
         elif users_to_add and not users_to_delete:
             record_in_report = Reports(user_id, user_name, users_to_add, "")
-            print("2")
         elif users_to_add and users_to_delete:
             record_in_report = Reports(user_id, user_name, users_to_add, users_to_delete)
-            print("3")
 
         db.session.add(record_in_report)
         db.session.commit()
@@ -136,7 +132,6 @@ class Monitor(object):
                         print("[FOLLOWING MONITOR] Too many requests... Waiting 15 minutes")
                         time.sleep(900)
                 client_number += 1
-                time.sleep(5)
                 first = False
             print("[FOLLOWING MONITOR] Stopped monitor session.")
             time.sleep(3600)
