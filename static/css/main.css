@@ -1,0 +1,199 @@
+html, body{
+    margin: 0;
+    padding: 0;
+    background-color: #12232E;
+    color: #EEFBFB;
+    font-family: georgia;
+    height: 100%;
+}
+a{
+    text-decoration: none;
+    color: #EEFBFB;
+}
+a:hover{
+    color: #4DA8DA;
+    font-weight: bold;
+}
+
+.top-bar{
+    width: 100%;
+    height: 10%;
+    box-shadow: inset 0px 0px 5px 5px #203647;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#top-text{
+    float: left;
+    width: 80%;
+    margin-left: 10%;
+}
+#settings-button{
+    margin: auto;
+    float: left;
+    position: block;
+
+}
+ /* For settings button */
+.setting-b {
+  background-color: #4DA8DA;
+  border: none;
+  padding: 20px 30px;
+  color: #EEFBFB;
+  cursor: pointer;
+
+}
+ /* For all small button */
+.setting-b:hover {
+  background-color: #007CC7;
+}
+.small-b {
+  background-color: #4DA8DA;
+  border: none;
+  padding: 5px 10px;
+  color: #EEFBFB;
+  cursor: pointer;
+
+}
+ /* For all small button */
+.small-b:hover {
+  background-color: #007CC7;
+}
+
+
+
+#content-box{
+    width: 100%;
+    height: 90%;
+    clear: both;
+}
+#monitor-box{
+    width: 80%;
+    height: 100%;
+    float: left;
+    box-shadow: inset 0px 0px 5px 5px #203647;
+}
+.info{
+    width: 100%;
+    height: 10%;
+    vertical-align: middle;
+    box-shadow: inset 0px 0px 5px 5px #203647;
+}
+#last-updates{
+    height: 100%;
+    width: 80%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    float: left;
+}
+#update-time{
+    height: 100%;
+    width: 20%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    float: left;
+}
+.info-block{
+    float: left;
+    height: 100%;
+    width: 33%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.search-block{
+    float: left;
+    height: 100%;
+    width: 33%;
+}
+
+input[type=text] {
+  width: 100%;
+  display: inline-block;
+  border: 1px solid #4DA8DA;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+#form-block{
+    float: left;
+    width:50%;
+}
+
+#form-block-result{
+    float: left;
+    margin: 20px;
+
+}
+#following-box{
+    width: 20%;
+    height: 100%;
+    float: left;
+    box-shadow: inset 0px 0px 5px 5px #203647;
+    position: relative;
+    overflow: auto;
+}
+
+.following-user{
+    width: 100%;
+    min-height 5%;
+    margin: 5px;
+    padding-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+.unfollow-button-block{
+    display: flex;
+    justify-content: center;
+}
+
+.monitored-list{
+    height: 80%;
+    width: 100%;
+    overflow-y: auto;
+}
+
+.monitored-user-block{
+    margin-top: 20px;
+    height: 20%;
+    width: 100%;
+    box-shadow: inset 0px 0px 5px 5px #203647;
+}
+.monitored-user-block-buttons{
+    height: 100%;
+    width: 10%;
+    box-shadow: inset 0px 0px 5px 5px #203647;
+    float: left;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.monitored-user-block-names{
+    height: 100%;
+    width: 10%;
+    box-shadow: inset 0px 0px 5px 5px #203647;
+    float: left;
+}
+.monitored-user-block-data{
+    height: 100%;
+    width: 80%;
+    float: left;
+}
+.monitored-user-block-data-details{
+    height: 33%;
+    width: 100%;
+    box-shadow: inset 0px 0px 5px 5px #203647;
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+
+}
+.monitored-user-block-data-name{
+    float: left;
+    height: 100%;
+    width: 50%;
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+}

@@ -290,7 +290,7 @@ def unfollow_user(user_id, user_name):
     c.execute(query)
     conn.commit()
     conn.close()
-    print(f"[{current_user.name}] removed {user_name} from db")
+    print(f"[{current_user.name}] removed {user_name} from followers")
     return redirect(url_for("panel_site"))
 
 # used to stop_monitoring user and remove from db

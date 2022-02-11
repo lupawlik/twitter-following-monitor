@@ -2,92 +2,113 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     {% block title %}<title>Panel użytkownika {{user}}</title>{% endblock %}
-    <style>
-        .middle-box {
-            float: left;
-            width:  33%;
-            height: 700px;
-            overflow: auto;
-        }
-        .middle-box-title{
-            width: 100%;
-            text-align: center;
-        }
-        .following-user-block:{
-            width: 100%;
-            text-align: left;
-        }
-        .title-span:{
-            padding-top: 25px;
-            text-align: left;
-        }
 
-
-    </style>
 </head>
 <body>
-<center><h1>Witaj @{{user}}, poprawnie zalogowano do panelu!</h1></center>
-<center><a href="{{url_for('logout_page')}}">Wyloguj mnie!</a></center>
+<div class="top-bar">
+    <div id="top-text"><center><h1>Witaj <a target="_blank" href={{"https://twitter.com/"+user}}>@{{user}}</a>, poprawnie zalogowano do panelu!</h1></center></div>
+    <div id="settings-button"><button class="setting-b"><i class="fa fa-bars"></i> Ustawienia</button></div>
+</div>
+<div id="content-box">
+    <div id="monitor-box">
+        <div class="info">
+            <div id="last-updates">
+                Brak nowych aktualizacji
+            </div>
+            <div id="update-time">
+                Dane są pokazywane 2 dni wstecz
+            </div>
+        </div>
+        <div class="info">
+            <div class="info-block">
+                <a class="link-to-twitter" href="{{url_for('logout_page')}}"><button class="setting-b"><i class="fa fa-sign-out" aria-hidden="true"></i> Wyloguj mnie z panelu!</button></a>
+            </div>
+            <div class="info-block">
+                <h1>Monitor obserwacji</h1>
+            </div>
+            <div class="search-block">
+                <div id="form-block">
+                    Wyszukaj osobę:
+                    <form action="/panel/" method="post">
+                        <input type="text" name="username" autocomplete="off" required><br>
+                        <p><button class="small-b" type="submit" name="button_panel" value="search"><i class="fa fa-search" aria-hidden="true"></i> Szukaj</button></p><br>
+                    </form>
+                </div>
+                <div id="form-block-result">
+                    {% if searched_user is defined %}
+                        {{searched_user.split("-")[1]}}<br>
+                        <a target="_blank" href={{"https://twitter.com/"+searched_user.split("-")[2]}}>@{{searched_user.split("-")[2]}}</a>
+                        <form action={{url_for('panel_site',user_data=searched_user)}} method="post">
+                            <button class="small-b" type="submit" name="button_panel" value="follow">Obserwuj</button> <button class="small-b" type="submit" name="button_panel" value="monitoruj">Monitoruj</button><br>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="monitored-list">
+            {% if monitoring_list != None %}
+                {% for users in monitoring_list %}
+                    <div class="monitored-user-block">
+                        <div class="monitored-user-block-buttons">
+                            <a href="{{url_for('unmonitor_user', user_id=users[0], user_name=users[1])}}"><button class="small-b">Usuń</button> </a>
+                        </div>
+                        <div class="monitored-user-block-names">
 
-    <div class="middle-box">
-        <center>
-            <h3>Aktualnie obserwujesz:</h3>
-            {% for users in following_list %}
-                <a target="_blank" href={{"https://twitter.com/"+users}}>@{{users.split(' ')[1]}}</a> <center><a href="{{url_for('unfollow_user', user_id=users.split(' ')[0], user_name=users.split(' ')[1])}}"> Przestań obserwować</a></center><br>
-            {% endfor %}
-        </center>
-    </div>
-    <div class="middle-box">
-        <center>
-            <h3>Wyswietl użytkownika po nazwie:</h3>
-            <form action="/panel/" method="post">
-                <input type="text" name="username" required><br>
-                <input type="submit" name="button_panel" value="search"><br>
-            </form>
-            {% if searched_user is defined %}
-                {{searched_user.split("-")[1]}} (@{{searched_user.split("-")[2]}})<br>
-            <form action={{url_for('panel_site',user_data=searched_user)}} method="post">
-                <input type="submit" name="button_panel" value="follow"> <input type="submit" name="button_panel" value="monitoruj"><br>
-            </form>
+                        </div>
+                        <div class="monitored-user-block-data">
+                            <div class="monitored-user-block-data-details">
+                                <div class="monitored-user-block-data-name">
+                                        <a target="_blank" href={{"https://twitter.com/"+users[1]}}><strong>@{{users[1]}}</strong></a>
+                                </div>
+                                <div class="monitored-user-block-data-name">
+                                        Ostatnia aktualizacja nastąpiła:
+                                </div>
+                            </div>
+                            <div class="monitored-user-block-data-details">
+                                {% if users[2] != None %}
+                                    <span class="monitoring-list">
+                                        {% for new_followers in users[2] %}
+                                            {{new_followers.split(" ")[1]}},
+                                        {% endfor %}
+                                    </span><br>
+                                {% else %}
+                                    <span class="monitoring-list">-------------</span><br>
+                                {% endif %}
+                            </div>
+                            <div class="monitored-user-block-data-details">
+                                {% if users[3] != None %}
+                                    <span class="monitoring-list">
+                                        {% for new_followers in users[3] %}
+                                            {{new_followers.split(" ")[1]}},
+                                        {% endfor %}
+                                    </span><br>
+                                {% else %}
+                                    <span class="monitoring-list">-------------</span><br>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
             {% endif %}
-        </center>
-    </div>
-    <div class="middle-box">
-
-        <div class="middle-box-title"><h3>Monitor obserwacji:</h3></div>
-        {% if monitoring_list != None %}
-            {% for users in monitoring_list %}
-                <div class="following-user-block">
-                    <div class="monitored-user-name">
-                        <div class="monitored-urls"><a target="_blank" href={{"https://twitter.com/"+users[1]}}><strong>@{{users[1]}}</strong></a></div>
-                        <div class="monitored-urls"><a href="{{url_for('unmonitor_user', user_id=users[0], user_name=users[1])}}"> Przestań monitorować</a></div>
-                    <span class="title-span"><strong>Nowe followy:</strong></span>
-                    {% if users[2] != None %}
-                        <span class="monitoring-list">
-                            {% for new_followers in users[2] %}
-                                {{new_followers.split(" ")[1]}},
-                            {% endfor %}
-                        </span><br>
-                    {% else %}
-                        <span class="monitoring-list">Brak zmian</span><br>
-                    {% endif %}
-                    <span class="title-span"><strong>Nowe unfollowy:</strong></span>
-                    {% if users[3] != None %}
-                        <span class="monitoring-list">
-                            {% for new_followers in users[3] %}
-                                {{new_followers.split(" ")[1]}},
-                            {% endfor %}
-                        </span><br>
-                    {% else %}
-                        <span class="monitoring-list">Brak zmian</span><br>
-                    {% endif %}
-
-                </div><br>
-            {% endfor %}
-        {% endif %}
+        </div>
     </div>
 
+    <div id="following-box">
+        <center><span class="title-span">Aktualnie obserwujesz</span></center>
 
+        {% for users in following_list %}
+            <div class="following-user">
+                <a target="_blank" href={{"https://twitter.com/"+users}}><i class="fa fa-twitter" aria-hidden="true"></i><span>{{users.split(' ')[1]}}</span></a><br>
+            </div>
+            <div class="unfollow-button-block">
+                <a href="{{url_for('unfollow_user', user_id=users.split(' ')[0], user_name=users.split(' ')[1])}}"> <i class="fa fa-minus" aria-hidden="true"></i> unfollow</a><br>
+            </div>
+        {% endfor %}
+    </div>
+
+</div>
 </body>
 </html>

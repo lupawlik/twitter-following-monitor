@@ -58,7 +58,7 @@ class Monitor(object):
                 # add this user to string that been added to old following list and saved in db
                 users_to_add += f"{user_from_r['id']} {user_from_r['username']},"
         if users_to_add:
-            print(f"[{user_name}] started following {users_to_add}")
+            print(f"[FOLLOWING MONITOR][{user_name}] started following {users_to_add}")
             query = f"UPDATE spied_users SET last_follow='{users_to_add}' WHERE user_id='{user_id}'"
             self.c.execute(query)
             self.conn.commit()
@@ -80,7 +80,7 @@ class Monitor(object):
                 users_to_delete += delete_this
                 new_users_to_query = str(new_users_to_query).replace(delete_this, "")
         if users_to_delete:
-            print(f"[{user_name}] removed from following {users_to_delete}")
+            print(f"[FOLLOWING MONITOR][{user_name}] removed from following {users_to_delete}")
             query = f"UPDATE spied_users SET last_unfollow='{users_to_delete}' WHERE user_id='{user_id}'"
             self.c.execute(query)
             self.conn.commit()
