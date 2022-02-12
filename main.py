@@ -1,5 +1,3 @@
-# ZROBIĆ WORKERA KTÓRY BĘDZIE USUWAŁ RAPORTY STARSZE NIZ TYDZIEN
-
 import threading
 import sqlite3
 from datetime import datetime, timedelta
