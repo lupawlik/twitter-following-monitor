@@ -1,11 +1,8 @@
-# BRAĆ POD UWAGĘ ILOŚC DNI NA RAPORT (DODAĆ TAKA KOLUMNE DLA USEROW)
 # ZROBIĆ WORKERA KTÓRY BĘDZIE USUWAŁ RAPORTY STARSZE NIZ TYDZIEN
-
-
-# 1 step - app have button to login via twitter, add user to sqlite db. Login to user from db by flask_login library
 
 import threading
 import sqlite3
+from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -141,32 +138,42 @@ def logout_page():
 @login_required
 def panel_site(user_data='', data=''):
     # ZAMIENIC TO FUNKCJA NIE OBIEKT
-    # return list of following from current_user, display it on main page
+
+
     conn = sqlite3.connect("database.db", check_same_thread=False)
     c = conn.cursor()
+    # return list of following from current_user, display it on main page
     following_list = str(current_user.following).split(",")
-    # list of monitoring users
+    # return list of monitoring users
     monitoring_list = str(current_user.spied_users).split(",")
     # remove last element from list (its empty)
     following_list = following_list[:-1]
     monitoring_list = monitoring_list[:-1]
+    # return number of days - used to takes data from reports tab until thats days
+    number_of_days = int(current_user.days_to_report)
 
-    # get last follow updates and name from spied_users table, searching by monitoring_ids
+    # get last follow updates and name from report table, searching by monitoring_ids and date > now-number_of_days
     # used to print in html
-    # return None if last_follow/last_unfollow is empty
+    # return id and None if last_follow/last_unfollow is empty
     # if user is monitoring more than one user - get list of monitoring users and last updates
     # else get user id - string
     # list of last follows or list of last unfollow it's in string format separated with , (split it and save back in users_with_updates)
-    # when is monitored only one person
     # users_with_updates[0][2] it is last follow info. users_with_updates[0][3] it is last unfollow info
-    list_of_all_spied_datas = []#  stores list of list first. First list contains list of data of each spied user, second contains [id, name, last_follow, last_unfollow]
+    list_of_all_spied_datas = []#  stores list of list. First list contains list of data of each spied user, second contains [id, name, last_follow, last_unfollow]
 
     # when is monitored one person or more
     if len(monitoring_list) > 0:
+
+        # get now time
+        now = datetime.now()
+        # get time to take reports
+        time_to_reports = now - timedelta(days=number_of_days)
+
         monitoring_ids = tuple(x.split(" ")[0] for x in monitoring_list)
+
         # get data from report table, if in report table record with given id is not exist, set last follow/unfollow to None
         for i in monitoring_ids:
-            query = f"SELECT user_id, name, last_follow, last_unfollow FROM reports WHERE user_id is {i}"
+            query = f"SELECT user_id, name, last_follow, last_unfollow FROM reports WHERE user_id is {i} AND date(date) >= date('{time_to_reports}')"
             c.execute(query)
             users_with_updates = list(c.fetchall())
 
@@ -196,25 +203,40 @@ def panel_site(user_data='', data=''):
 
     if request.method == "POST":
         req = request.form
-        username = req.get('username')
-        button_data = req.get('button_panel')
+        session['username'] = req.get('username')
+        session['button_data'] = req.get('button_panel')
+
         # if user is searching for user_name in html form
-        if button_data == "search":
+        if session['button_data'] == "search":
             # returns data about user
-            searched_user = TwitterApi(current_user).get_user_by_name(username)
+            searched_user = TwitterApi(current_user).get_user_by_name(session['username'])
             # if user_name exist on twitter redirerct to same site but with user data in url
             if searched_user:
                 user_data = f"{searched_user['data']['id']}-{searched_user['data']['name']}-{searched_user['data']['username']}"
                 return redirect(url_for("panel_site", user_data=user_data))
             return redirect(url_for("panel_site"))
 
+    # handle form from settings tab
+    if request.method == "POST":
+        req = request.form
+        session['button_data'] = req.get('settings_button')
+
+        # when user changed number of days in settings change days_to_report in table user
+        if session['button_data'] == "set_days":
+            session['number_of_days'] = req.get('number_of_days')
+            query = f"UPDATE user SET days_to_report={session['number_of_days']} WHERE user_id='{current_user.user_id}'"
+            c.execute(query)
+            conn.commit()
+            print(f"[{current_user.name}] Changed nubmer of days to report to {session['number_of_days']}")
+            return redirect(url_for("panel_site"))
+
     # when user_data in url and user send post, follow user from user_data
     if user_data:
         if request.method == "POST":
             req = request.form
-            button_data = req.get('button_panel')
+            session['button_data'] = req.get('button_panel')
             # when user want to follow searched user, get id from user_data from url
-            if button_data == "follow":
+            if session['button_data'] == "follow":
                 user_id = user_data.split("-")[0]
                 user_name = user_data.split("-")[2]
 
@@ -235,7 +257,7 @@ def panel_site(user_data='', data=''):
             # 1) add to user db id of user to monitor
             # 2) add to spied_user user
             # 3) add to spied_user table following list
-            if button_data == "monitoruj":
+            if session['button_data'] == "monitoruj":
                 user_id = user_data.split("-")[0]
                 screen_name = user_data.split("-")[1]
                 user_name = user_data.split("-")[2]
@@ -270,9 +292,9 @@ def panel_site(user_data='', data=''):
                 conn.commit()
                 return redirect(url_for("panel_site"))
         # runs when user searched for twitter user
-        return render_template("panel.html", user=current_user.name, following_list=following_list, monitoring_list=list_of_all_spied_datas, searched_user=user_data)
+        return render_template("panel.html", user=current_user.name, following_list=following_list, monitoring_list=list_of_all_spied_datas, number_of_days=number_of_days, searched_user=user_data)
     # runs when url is without any parameters
-    return render_template("panel.html", user=current_user.name, following_list=following_list, monitoring_list=list_of_all_spied_datas)
+    return render_template("panel.html", user=current_user.name, following_list=following_list, monitoring_list=list_of_all_spied_datas, number_of_days=number_of_days,)
 
 # used to unfollow user and remove from db
 @app.route("/unfollow/<user_id>/<user_name>/", methods=['POST', 'GET'])

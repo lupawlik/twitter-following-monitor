@@ -12,6 +12,7 @@ class User(UserMixin, db.Model):
     oauth_token_secret = db.Column(db.String(70))
     following = db.Column(db.String(200000))
     spied_users = db.Column(db.String(200000))
+    days_to_report = db.Column(db.Integer, default=1)
 
     def __init__(self, user_id, name, oauth_token, oauth_token_secret):
         self.user_id = user_id

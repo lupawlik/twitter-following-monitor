@@ -4,22 +4,73 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <script>
+        function pop_settings(){
+            document.getElementById("popup").style.display = "block";
+        }
+        function close_settings(){
+            document.getElementById("popup").style.display = "none";
+        }
+
+
+    </script>
     {% block title %}<title>Panel użytkownika {{user}}</title>{% endblock %}
 
 </head>
 <body>
 <div class="top-bar">
     <div id="top-text"><center><h1>Witaj <a target="_blank" href={{"https://twitter.com/"+user}}>@{{user}}</a>, poprawnie zalogowano do panelu!</h1></center></div>
-    <div id="settings-button"><button class="setting-b"><i class="fa fa-bars"></i> Ustawienia</button></div>
+    <div id="settings-button"><button class="setting-b" onclick="pop_settings()"><i class="fa fa-cog" aria-hidden="true"></i> Ustawienia</button></div>
+    <div class="settings-popup" id="popup">
+        <div class="settings-title">
+            <h3>Ustawienia</h3>
+        </div>
+
+        <div class="settings-option">
+            <form style="width: 100%; height: 100%;" action="/panel/" method="post">
+                <div class="settings-option-title">Ile dni wstecz: </div>
+                <div class="settings-option-select">
+                    <select name="number_of_days">
+                        <option>1</option>
+                        <option>2</option>
+                        <option>3</option>
+                        <option>4</option>
+                        <option>5</option>
+                        <option>6</option>
+                        <option>7</option>
+                    </select>
+                </div>
+                <div class="settings-option-accept">
+                    <button name="settings_button" value="set_days" class="small-b" type="submit"><i class="fa fa-check" aria-hidden="true"></i> Zapisz</button>
+                </div>
+            </form>
+        </div>
+        <div class="settings-option">
+        </div>
+        <div class="settings-option">
+        </div>
+        <div class="settings-option" id="submit-pop">
+            <button class="setting-b" onclick="close_settings()">Zamknij</button>
+        </div>
+    </div>
+
 </div>
 <div id="content-box">
     <div id="monitor-box">
         <div class="info">
             <div id="last-updates">
-                Brak nowych aktualizacji
+                {% if info is defined %}
+                    test
+                {% else %}
+                    Brak nowych aktualizacji
+                {% endif %}
             </div>
             <div id="update-time">
-                Dane są pokazywane 2 dni wstecz
+                {% if number_of_days==1 %}
+                    Dane są pokazywane {{number_of_days}} dzień wstecz
+                {% else %}
+                    Dane są pokazywane {{number_of_days}} dni wstecz
+                {% endif %}
             </div>
         </div>
         <div class="info">
@@ -53,10 +104,12 @@
                 {% for users in monitoring_list %}
                     <div class="monitored-user-block">
                         <div class="monitored-user-block-buttons">
-                            <a href="{{url_for('unmonitor_user', user_id=users[0], user_name=users[1])}}"><button class="small-b">Usuń</button> </a>
+                            <a href="{{url_for('unmonitor_user', user_id=users[0], user_name=users[1])}}"><button class="small-b"><i class="fa fa-minus" aria-hidden="true"></i> Usuń</button> </a>
                         </div>
                         <div class="monitored-user-block-names">
-
+                            <div class="monitored-user-block-names-title">Dane: </div>
+                            <div class="monitored-user-block-names-title">Followy: </div>
+                            <div class="monitored-user-block-names-title">Unfollowy: </div>
                         </div>
                         <div class="monitored-user-block-data">
                             <div class="monitored-user-block-data-details">

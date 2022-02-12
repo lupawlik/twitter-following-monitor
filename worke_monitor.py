@@ -1,5 +1,6 @@
 import sqlite3
 import time
+from datetime import datetime, timedelta
 from requests_oauthlib import OAuth1Session
 from twitter_api import TWITTER_KEY, TWITTER_SECRET
 from db_objects import Reports
@@ -29,6 +30,17 @@ class Monitor(object):
 
     def _get_following_from_db(self):
         pass
+
+    # takes n number of days. Removes from reports tables reports older than today-n
+    def _remove_old_reports(self, n):
+          # get now time
+        now = datetime.now()
+        # get time to take reports
+        time_to_reports = now - timedelta(days=n)
+        query = f"DELETE FROM reports WHERE date(date) < date('{time_to_reports}')"
+        self.c.execute(query)
+        self.conn.commit()
+        print(query)
 
     # takes following list of spied user from db and from api. Compare and add last_follow, last_unfollow and update following column in spied_users
     # token and secret from user table, used to make requests
@@ -133,5 +145,6 @@ class Monitor(object):
                         time.sleep(900)
                 client_number += 1
                 first = False
+            self._remove_old_reports(14)
             print("[FOLLOWING MONITOR] Stopped monitor session.")
             time.sleep(3600)

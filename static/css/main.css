@@ -15,6 +15,18 @@ a:hover{
     font-weight: bold;
 }
 
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4DA8DA;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #007CC7;
+}
+
 .top-bar{
     width: 100%;
     height: 10%;
@@ -53,15 +65,62 @@ a:hover{
   padding: 5px 10px;
   color: #EEFBFB;
   cursor: pointer;
-
 }
  /* For all small button */
 .small-b:hover {
   background-color: #007CC7;
 }
+.settings-popup{
+  display: none;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  height: 30%;
+  width: 40%;
+  z-index: 1;
+  background-color: #12232E;
+  box-shadow: inset 0px 0px 15px 15px #203647;
 
+}
+.settings-title{
+    height: 10%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0px 0px 5px 5px #203647;
+}
+.settings-option{
+    margin-top: 10px;
+    width: 100%;
+    height: 20%;
+    box-shadow: inset 0px 0px 5px 5px #203647;
+}
+.settings-option-title, .settings-option-select, .settings-option-accept{
+    float: left;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.settings-option-title{
+    width: 30%;
+    height: 100%;
+}
+.settings-option-select{
+    width: 50%;
+    height: 100%;
+}
+.settings-option-accept{
+    width: 20%;
+    height: 100%;
+}
 
-
+#submit-pop{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0px 0px 5px 5px #203647;
+}
 #content-box{
     width: 100%;
     height: 90%;
@@ -86,6 +145,7 @@ a:hover{
     align-items: center;
     justify-content: center;
     float: left;
+    box-shadow: inset 0px 0px 5px 5px #203647;
 }
 #update-time{
     height: 100%;
@@ -94,6 +154,7 @@ a:hover{
     align-items: center;
     justify-content: center;
     float: left;
+    box-shadow: inset 0px 0px 5px 5px #203647;
 }
 .info-block{
     float: left;
@@ -109,7 +170,7 @@ a:hover{
     width: 33%;
 }
 
-input[type=text] {
+input[type=text], select{
   width: 100%;
   display: inline-block;
   border: 1px solid #4DA8DA;
@@ -138,7 +199,6 @@ input[type=text] {
 .following-user{
     width: 100%;
     min-height 5%;
-    margin: 5px;
     padding-top: 20px;
     display: flex;
     justify-content: center;
@@ -175,6 +235,15 @@ input[type=text] {
     box-shadow: inset 0px 0px 5px 5px #203647;
     float: left;
 }
+.monitored-user-block-names-title{
+    height: 33%;
+    width: 100%;
+    box-shadow: inset 0px 0px 5px 5px #203647;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .monitored-user-block-data{
     height: 100%;
     width: 80%;
