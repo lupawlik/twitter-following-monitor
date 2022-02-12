@@ -59,10 +59,10 @@
     <div id="monitor-box">
         <div class="info">
             <div id="last-updates">
-                {% if info is defined %}
-                    test
-                {% else %}
+                {% if message is not defined or message==None%}
                     Brak nowych aktualizacji
+                {% else %}
+                    {{message}}
                 {% endif %}
             </div>
             <div id="update-time">

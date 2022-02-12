@@ -32,15 +32,19 @@ class Monitor(object):
         pass
 
     # takes n number of days. Removes from reports tables reports older than today-n
+    # return true or false, if is successfully or not
     def _remove_old_reports(self, n):
           # get now time
         now = datetime.now()
         # get time to take reports
         time_to_reports = now - timedelta(days=n)
-        query = f"DELETE FROM reports WHERE date(date) < date('{time_to_reports}')"
-        self.c.execute(query)
-        self.conn.commit()
-        print(query)
+        try:
+            query = f"DELETE FROM reports WHERE date(date) < date('{time_to_reports}')"
+            self.c.execute(query)
+            self.conn.commit()
+            return True
+        except:
+            return False
 
     # takes following list of spied user from db and from api. Compare and add last_follow, last_unfollow and update following column in spied_users
     # token and secret from user table, used to make requests

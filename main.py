@@ -1,5 +1,6 @@
 import threading
 import sqlite3
+import time
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
@@ -135,11 +136,14 @@ def logout_page():
 @app.route("/panel/<user_data>", methods=['POST', 'GET'])
 @login_required
 def panel_site(user_data='', data=''):
-    # ZAMIENIC TO FUNKCJA NIE OBIEKT
-
-
     conn = sqlite3.connect("database.db", check_same_thread=False)
     c = conn.cursor()
+
+    # return messages from url_for - pass to jinja2 and print it
+    try:
+        message = session['message']
+    except:
+        message = None
     # return list of following from current_user, display it on main page
     following_list = str(current_user.following).split(",")
     # return list of monitoring users
@@ -211,7 +215,9 @@ def panel_site(user_data='', data=''):
             # if user_name exist on twitter redirerct to same site but with user data in url
             if searched_user:
                 user_data = f"{searched_user['data']['id']}-{searched_user['data']['name']}-{searched_user['data']['username']}"
+                session['message'] = "Znaleziono użytkownika"
                 return redirect(url_for("panel_site", user_data=user_data))
+            session['message'] = "Nie znaleziono użytkownika"
             return redirect(url_for("panel_site"))
 
     # handle form from settings tab
@@ -226,9 +232,10 @@ def panel_site(user_data='', data=''):
             c.execute(query)
             conn.commit()
             print(f"[{current_user.name}] Changed nubmer of days to report to {session['number_of_days']}")
+            session['message'] = f"Zmieniono ilość dni dla której są brane raporty na: {session['number_of_days']}"
             return redirect(url_for("panel_site"))
 
-    # when user_data in url and user send post, follow user from user_data
+    # when user_data in url and user send post, follow/start monitoring user from user_data
     if user_data:
         if request.method == "POST":
             req = request.form
@@ -240,6 +247,7 @@ def panel_site(user_data='', data=''):
 
                 # when user to follow already exist
                 if f"{user_id} {user_name}," in current_user.following:
+                    session['message'] = f"Już obserwujesz {user_name}"
                     return redirect(url_for("panel_site"))
 
                 # follow new user and save new follow in db
@@ -249,6 +257,7 @@ def panel_site(user_data='', data=''):
                 c.execute(query)
                 conn.commit()
                 print(f"[{current_user.name}] added {user_name} to following")
+                session['message'] = f"Dodano {user_name} do obserwowanych"
                 return redirect(url_for("panel_site"))
 
             # when user add user to monitor
@@ -268,15 +277,30 @@ def panel_site(user_data='', data=''):
                 else:
                     # when user in monitor already exist
                     if f"{user_id} {user_name}," in current_user.spied_users:
+                        session['message'] = f"Już monitorujesz {user_name}"
                         return redirect(url_for("panel_site"))
 
                     new_user = f"{current_user.spied_users}{user_id} {user_name},"
                     query = f"UPDATE user SET spied_users='{new_user}' WHERE user_id='{current_user.user_id}'"
-                # get following list to spied user
+
+                # try to get data about user if to many request, run worker thats wait 15 minutes and adds user
                 new_user_list = TwitterApi(current_user).get_following_by_user(user_id)
-                new_users_to_query = ""
-                for user_from_r in new_user_list['data']:
-                     new_users_to_query += f"{user_from_r['id']} {user_from_r['username']},"
+                # first try is when something with request went wrong ex. too many requests/no following list
+                try:
+                    new_user_list = new_user_list['data']
+                    new_users_to_query = ""
+                    for user_from_r in new_user_list:
+                        new_users_to_query += f"{user_from_r['id']} {user_from_r['username']},"
+                except:
+                    # try when too many requsts
+                    try:
+                        if new_user_list['meta']['result_count'] == 0:
+                            new_users_to_query = ""
+                    except:
+                        if new_user_list['status'] == 429:
+                            print(f"[{current_user.name}] too many request due added new usesr to monitor. Started new worker")
+                            session['message'] = f"Przepraszamy, ze względu na zbyt dużą ilość zapytań użytkownik {user_name} nie został dodany. Spróbuj za 15 min!"
+                            return redirect(url_for("panel_site"))
 
                 # add user to spied_users table
                 spied_usr = SpiedUsers(user_id, user_name, screen_name, new_users_to_query)
@@ -288,11 +312,12 @@ def panel_site(user_data='', data=''):
                     db.session.rollback()
                 c.execute(query)
                 conn.commit()
+                session['message'] = f"Dodano {user_name} do monitorowanych"
                 return redirect(url_for("panel_site"))
         # runs when user searched for twitter user
-        return render_template("panel.html", user=current_user.name, following_list=following_list, monitoring_list=list_of_all_spied_datas, number_of_days=number_of_days, searched_user=user_data)
+        return render_template("panel.html", user=current_user.name, following_list=following_list, monitoring_list=list_of_all_spied_datas, number_of_days=number_of_days, message=message, searched_user=user_data)
     # runs when url is without any parameters
-    return render_template("panel.html", user=current_user.name, following_list=following_list, monitoring_list=list_of_all_spied_datas, number_of_days=number_of_days,)
+    return render_template("panel.html", user=current_user.name, following_list=following_list, monitoring_list=list_of_all_spied_datas, number_of_days=number_of_days, message=message)
 
 # used to unfollow user and remove from db
 @app.route("/unfollow/<user_id>/<user_name>/", methods=['POST', 'GET'])
@@ -311,6 +336,7 @@ def unfollow_user(user_id, user_name):
     conn.commit()
     conn.close()
     print(f"[{current_user.name}] removed {user_name} from followers")
+    session['message'] = f"Usunięto z obserwacji {user_name}"
     return redirect(url_for("panel_site"))
 
 # used to stop_monitoring user and remove from db
@@ -348,7 +374,13 @@ def unmonitor_user(user_id, user_name):
         conn.commit()
     conn.close()
     print(f"[{current_user.name}] stopped monitoring {user_name}")
+    session['message'] = f"Usunięto z listy moniotrowanych {user_name}"
     return redirect(url_for("panel_site"))
+
+# used when user want to monitor/follow more than twitter api rate limit can handle (too many requests)
+# waits 15 minutuse, than try monitor given user
+def add_to_monitor_worker(user_id, user_name, screen_name, query):
+    pass
 
 if __name__ == '__main__':
     db.create_all()  # crate tables in database
