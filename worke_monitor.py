@@ -77,7 +77,11 @@ class Monitor(object):
             print(f"[FOLLOWING MONITOR][{user_name}] started following {users_to_add}")
             query = f"UPDATE spied_users SET last_follow='{users_to_add}' WHERE user_id='{user_id}'"
             self.c.execute(query)
+            query = f"UPDATE spied_users SET last_update_date='{datetime.now()}' WHERE user_id='{user_id}'"
+            self.c.execute(query)
             self.conn.commit()
+            # update last_update time
+
 
         # check if user unfollow someone new
         users_to_delete = ""
@@ -98,6 +102,8 @@ class Monitor(object):
         if users_to_delete:
             print(f"[FOLLOWING MONITOR][{user_name}] removed from following {users_to_delete}")
             query = f"UPDATE spied_users SET last_unfollow='{users_to_delete}' WHERE user_id='{user_id}'"
+            self.c.execute(query)
+            query = f"UPDATE spied_users SET last_update_date='{datetime.now()}' WHERE user_id='{user_id}'"
             self.c.execute(query)
             self.conn.commit()
 
@@ -128,7 +134,9 @@ class Monitor(object):
             print("[FOLLOWING MONITOR] Starting new monitor session...")
             secrets = self.__get_clients()
             if len(secrets) == 0:
-                return None
+                print("[FOLLOWING MONITOR] No registered users, waiting 1 hour.")
+                time.sleep(3600)
+                continue
             spied_users = self._get_spied_users()
 
             client_number = 0

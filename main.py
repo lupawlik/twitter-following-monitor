@@ -1,6 +1,5 @@
 import threading
 import sqlite3
-import time
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
@@ -109,6 +108,7 @@ def callback():
             login_user(user)
             print(f"Log in to {current_user.name} account")
             update_following()
+            session['message'] = f"Zalogowano oraz pobrano nową listę obserwowanych"
             return redirect(url_for("panel_site"))
 
         # if user is not exist
@@ -179,13 +179,18 @@ def panel_site(user_data='', data=''):
             c.execute(query)
             users_with_updates = list(c.fetchall())
 
+            # get last update date (from spied_user table)
+            query = f"SELECT last_update_date FROM spied_users WHERE user_id ={i}"
+            c.execute(query)
+            last_update_date = c.fetchall()[0][0]
+
             # when record not exist for this user, get only name and id
             if not users_with_updates:
                 query = f"SELECT user_id, name, last_follow, last_unfollow FROM spied_users WHERE user_id is {i}"
                 c.execute(query)
                 users_with_updates = list(c.fetchall())
                 #print(users_with_updates)
-                end_single_user_data = (users_with_updates[0][0], users_with_updates[0][1], None, None)
+                end_single_user_data = (users_with_updates[0][0], users_with_updates[0][1], None, None, last_update_date)
                 out_datas = list(end_single_user_data)
 
             else:
@@ -196,7 +201,7 @@ def panel_site(user_data='', data=''):
                 for spied_user in end_single_user_data:
                     followed += spied_user[2]
                     unfollowed += spied_user[3]
-                out_datas = [end_single_user_data[0][0], end_single_user_data[0][1], followed.split(",")[:-1], unfollowed.split(",")[:-1]]
+                out_datas = [end_single_user_data[0][0], end_single_user_data[0][1], followed.split(",")[:-1], unfollowed.split(",")[:-1], last_update_date]
             list_of_all_spied_datas.append(out_datas)
 
     # if user is not monitoring anyone
@@ -386,6 +391,7 @@ if __name__ == '__main__':
     db.create_all()  # crate tables in database
     monitor = Monitor()
     # flask app
-    threading.Thread(target=lambda: app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)).start()
+    threading.Thread(target=lambda: app.run(host="0.0.0.0", port=5000, use_reloader=False)).start()
     # monitor twitter
     threading.Thread(target=monitor.star_monitor).start()
+

@@ -29,6 +29,7 @@ class SpiedUsers(db.Model):
     following = db.Column(db.String(200000))
     last_follow = db.Column(db.String(200000))
     last_unfollow = db.Column(db.String(200000))
+    last_update_date = db.Column('last_update_date', db.DateTime)
 
     def __init__(self, user_id, name, screen_name, following):
         self.user_id = user_id

@@ -117,7 +117,11 @@
                                         <a target="_blank" href={{"https://twitter.com/"+users[1]}}><strong>@{{users[1]}}</strong></a>
                                 </div>
                                 <div class="monitored-user-block-data-name">
-                                        Ostatnia aktualizacja nastąpiła:
+                                    {% if users[4] != None %}
+                                        Ostatnia aktualizacja nastąpiła: {{users[4][:-7]}}
+                                    {% else %}
+                                        Ostatnia aktualizacja nastąpiła: -------------
+                                    {% endif %}
                                 </div>
                             </div>
                             <div class="monitored-user-block-data-details">
@@ -154,7 +158,8 @@
 
         {% for users in following_list %}
             <div class="following-user">
-                <a target="_blank" href={{"https://twitter.com/"+users}}><i class="fa fa-twitter" aria-hidden="true"></i><span>{{users.split(' ')[1]}}</span></a><br>
+                {% set user_name = users.split(' ')[1]%}
+                <a target="_blank" href={{"https://twitter.com/"+user_name}}><i class="fa fa-twitter" aria-hidden="true"></i><span>{{user_name}}</span></a><br>
             </div>
             <div class="unfollow-button-block">
                 <a href="{{url_for('unfollow_user', user_id=users.split(' ')[0], user_name=users.split(' ')[1])}}"> <i class="fa fa-minus" aria-hidden="true"></i> unfollow</a><br>
