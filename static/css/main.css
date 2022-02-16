@@ -54,12 +54,18 @@ a:hover{
   color: #EEFBFB;
   cursor: pointer;
   border-radius: 15px;
+}
+.login-b {
+  background-color: #4DA8DA;
+  border: none;
+  padding: 40px 60px;
+  color: #EEFBFB;
+  cursor: pointer;
+  border-radius: 15px;
+  font-size: 40px;
 
 }
- /* For all small button */
-.setting-b:hover {
-  background-color: #007CC7;
-}
+
 .small-b {
   background-color: #4DA8DA;
   border: none;
@@ -69,9 +75,24 @@ a:hover{
   border-radius: 10px;
 }
  /* For all small button */
-.small-b:hover {
+.small-b:hover, .login-b:hover {
   background-color: #007CC7;
 }
+
+.setting-b[disabled], .small-b[disabled]{
+  background-color: #cccccc;
+  color: #666666;
+}
+.setting-b[disabled]:hover, .small-b[disabled]:hover {
+  background-color: #cccccc;
+  color: #666666;
+}
+
+ /* For all small button */
+.setting-b:hover {
+  background-color: #007CC7;
+}
+
 .settings-popup{
   display: none;
   position: fixed;

@@ -1,20 +1,125 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Twitter monitor</title>
-    <style>
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <script>
+        function pop_settings(){
+            document.getElementById("popup").style.display = "block";
+        }
+        function close_settings(){
+            document.getElementById("popup").style.display = "none";
+        }
+
+
+    </script>
+    <title>Panel użytkownika {{user}}</title>
+
 </head>
 <body>
-<header><center><h1>Twitter followers monitor</h1></center></header>
+<div class="top-bar">
 
-<form method="post" action="/">
-    <center><p>Został wygenerowany dla Ciebie kod autorazycjny - możesz zalogować się przy pomocy twittera</p></center>
-    <center><button type="submit" value="Zaloguj sie przez twittera" style="border: 0; background: transparent">
-        <img src="https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/auth-docs/sign-in-with-twitter-gray.png.twimg.2560.png" width="150" height="25" alt="submit" onmouseover="this.src='https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/auth-docs/sign-in-with-twitter-link.png.twimg.2560.png';" onmouseout="this.src='https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/auth-docs/sign-in-with-twitter-gray.png.twimg.2560.png';"/>
-    </button>
-    </center>
-</form>
+    <div id="top-text"><center><h1>Zaloguj się używając konta Twitter żeby mieć dostęp do aplikacji</h1></center></div>
+    <div id="settings-button"><button class="setting-b" disabled><i class="fa fa-cog" aria-hidden="true"></i> Ustawienia</button></div>
+    <div class="settings-popup" id="popup">
+        <div class="settings-title">
+            <h3>Ustawienia</h3>
+        </div>
+
+        <div class="settings-option">
+            <form style="width: 100%; height: 100%;" action="/panel/" method="post">
+                <div class="settings-option-title">Ile dni wstecz: </div>
+                <div class="settings-option-select">
+                    <select name="number_of_days">
+                        <option>1</option>
+                        <option>2</option>
+                        <option>3</option>
+                        <option>4</option>
+                        <option>5</option>
+                        <option>6</option>
+                        <option>7</option>
+                    </select>
+                </div>
+                <div class="settings-option-accept">
+                    <button name="settings_button" value="set_days" class="small-b" type="submit"><i class="fa fa-check" aria-hidden="true"></i> Zapisz</button>
+                </div>
+            </form>
+        </div>
+        <div class="settings-option">
+        </div>
+        <div class="settings-option">
+        </div>
+        <div class="settings-option" id="submit-pop">
+            <button class="setting-b" onclick="close_settings()">Zamknij</button>
+        </div>
+    </div>
+
+</div>
+<div id="content-box">
+    <div id="monitor-box">
+        <div class="info">
+            <div id="last-updates">
+                <form method="post" action="/">
+                    <center><p>Został wygenerowany dla Ciebie kod autorazycjny - możesz zalogować się przy pomocy twittera</p></center>
+                </form>
+            </div>
+            <div id="update-time">
+                Tutaj zobaczysz informacje o dacie
+            </div>
+        </div>
+        <div class="info">
+            <div class="info-block">
+            </div>
+            <div class="info-block">
+                <h1>Monitor obserwacji</h1>
+            </div>
+            <div class="search-block">
+                <div id="form-block">
+                </div>
+                <div id="form-block-result">
+                </div>
+            </div>
+        </div>
+        <div class="monitored-list">
+                    <div class="monitored-user-block">
+                        <div class="monitored-user-block-buttons">
+                            <button class="small-b" disabled><i class="fa fa-minus" aria-hidden="true"></i> Usuń</button>
+                        </div>
+                        <div class="monitored-user-block-names">
+                            <div class="monitored-user-block-names-title">Dane: </div>
+                            <div class="monitored-user-block-names-title">Followy: </div>
+                            <div class="monitored-user-block-names-title">Unfollowy: </div>
+                        </div>
+                        <div class="monitored-user-block-data">
+                            <div class="monitored-user-block-data-details">
+                                <div class="monitored-user-block-data-name">
+                                        <strong>Nazwa obserwowanego użytkownika</strong>
+                                </div>
+                                <div class="monitored-user-block-data-name">
+                                    Ostatnia aktualizacja nastąpiła: -------------
+                                </div>
+                            </div>
+                            <div class="monitored-user-block-data-details">
+                                    <span class="monitoring-list">Tutaj zobaczysz listę ostatnich obserwacji przez tą osobę</span><br>
+                            </div>
+                            <div class="monitored-user-block-data-details">
+                                    <span class="monitoring-list">Tutaj zobaczysz listę ostatnich usniętych obserwacji przez tą osobę</span><br>
+                            </div>
+                        </div>
+                    </div>
+            <center><h2>Zaloguj się żeby zobaczyć!</h2></center>
+            <form method="post" action="/">
+                    <center><button class="login-b" type="submit" value="Zaloguj sie przez twittera"><i class="fa fa-twitter" aria-hidden="true"></i> Zaloguj mnie!</button></center>
+            </form>
+        </div>
+    </div>
+
+    <div id="following-box">
+        <center><span class="title-span">Aktualnie obserwujesz</span></center>
+        <center><p>Zaloguj się żeby zobaczyć!</p></center>
+    </div>
+
+</div>
 </body>
 </html>

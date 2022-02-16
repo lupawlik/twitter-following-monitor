@@ -82,7 +82,6 @@ class Monitor(object):
             self.conn.commit()
             # update last_update time
 
-
         # check if user unfollow someone new
         users_to_delete = ""
         for user_in_db in str(following_list).split(","):
