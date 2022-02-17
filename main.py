@@ -10,8 +10,9 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = ".."
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
-login_m = LoginManager() # set flask login extension
+login_m = LoginManager()  # set flask login extension
 login_m.init_app(app)
+login_m.login_view = 'index'  # redirect to index when user is not authorized
 
 from db_objects import User, SpiedUsers
 from worke_monitor import Monitor
