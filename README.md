@@ -18,14 +18,6 @@
 - Uses jinja2 with flask routes
 - Uses .yaml to store secrets
 
-## Introduction 
-This program is designed to communicate with Twitter api on behalf of the user, and then retrieve information about "monitored users" (a list of their following). We will obtain from it information on recent changes in the observations of the monitored user.
-- Monitored user - this is any twitter user we decide to monitor in order to see his latest follows / unfollows
-- We can add any number of monitored users, they are saved in the spied_users table
-- We can delete a monitored user
-- It is possible to change the number of days back for which followers / unfollows of monitored users are displayed (1-7 days)
-- We can follow/unfollow twitter users
-
 
 ## Authorization
 To use this application, we need a private Twitter account, this is because twitter limits the number of requests to 15 for 15 minutes - to get the observation list.
@@ -35,3 +27,11 @@ If the datas in /callback (redirected from twitter) are correct, the user will b
 
 
 ## Description 
+This program is designed to communicate with Twitter api on behalf of the user, and then retrieve information about "monitored users" (a list of their following). We will obtain from it information on recent changes in the observations of the monitored user.
+- Monitored user - this is any twitter user we decide to monitor in order to see his latest follows / unfollows
+- We can add any number of monitored users, they are saved in the spied_users table
+- We can delete a monitored user
+- It is possible to change the number of days back for which followers / unfollows of monitored users are displayed (1-7 days)
+- We can follow/unfollow twitter users
+
+![](images/twitter_app.png)
